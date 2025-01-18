@@ -35,6 +35,8 @@ const processImage = async (req, res, tool) => {
 
     res.set('Content-Type', 'image/jpeg');
     res.send(imageBuffer.data);
+
+    fs.unlinkSync(tempFilePath); // Menghapus file setelah dikirimkan sebagai respons
   } catch (error) {
     res.status(500).json({ error: 'Terjadi kesalahan saat memproses gambar.' });
   }
