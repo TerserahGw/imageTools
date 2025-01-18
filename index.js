@@ -27,11 +27,7 @@ const processImage = async (req, res, tool) => {
   }
 
   try {
-    const tempDir = path.join(__dirname, 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
-    }
-
+    const tempDir = '/tmp';
     const tempFilePath = path.join(tempDir, `${Date.now()}.jpg`);
     await downloadImage(imageUrl, tempFilePath);
 
@@ -39,8 +35,6 @@ const processImage = async (req, res, tool) => {
     const result = await pxpic.create(tempFilePath, tool);
 
     console.log(`Hasil pemrosesan: ${JSON.stringify(result)}`);
-
-    fs.unlinkSync(tempFilePath);
 
     res.json(result);
   } catch (error) {
