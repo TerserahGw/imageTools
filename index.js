@@ -17,16 +17,11 @@ const downloadImage = async (url, outputPath) => {
   return outputPath;
 };
 
-app.get('/api/:tool', async (req, res) => {
-  const tool = req.params.tool;
+const processImage = async (req, res, tool) => {
   const imageUrl = req.query.url;
 
   if (!imageUrl) {
     return res.status(400).json({ error: 'URL gambar diperlukan!' });
-  }
-
-  if (!pxpic.tool.includes(tool)) {
-    return res.status(400).json({ error: `Tool tidak valid. Pilih salah satu: ${pxpic.tool.join(', ')}` });
   }
 
   try {
@@ -46,7 +41,13 @@ app.get('/api/:tool', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Terjadi kesalahan saat memproses gambar.' });
   }
-});
+};
+
+app.get('/api/removebg', (req, res) => processImage(req, res, 'removebg'));
+app.get('/api/enhance', (req, res) => processImage(req, res, 'enhance'));
+app.get('/api/upscale', (req, res) => processImage(req, res, 'upscale'));
+app.get('/api/restore', (req, res) => processImage(req, res, 'restore'));
+app.get('/api/colorize', (req, res) => processImage(req, res, 'colorize'));
 
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
