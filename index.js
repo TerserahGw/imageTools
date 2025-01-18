@@ -14,11 +14,13 @@ const downloadImage = async (url, outputPath) => {
     responseType: 'arraybuffer',
   });
   fs.writeFileSync(outputPath, response.data);
+  console.log(`Gambar berhasil diunduh ke: ${outputPath}`);
   return outputPath;
 };
 
 const processImage = async (req, res, tool) => {
   const imageUrl = req.query.url;
+  console.log(`Menerima URL gambar: ${imageUrl}`);
 
   if (!imageUrl) {
     return res.status(400).json({ error: 'URL gambar diperlukan!' });
@@ -33,12 +35,16 @@ const processImage = async (req, res, tool) => {
     const tempFilePath = path.join(tempDir, `${Date.now()}.jpg`);
     await downloadImage(imageUrl, tempFilePath);
 
+    console.log(`Memulai pemrosesan gambar dengan tool: ${tool}`);
     const result = await pxpic.create(tempFilePath, tool);
+
+    console.log(`Hasil pemrosesan: ${JSON.stringify(result)}`);
 
     fs.unlinkSync(tempFilePath);
 
     res.json(result);
   } catch (error) {
+    console.error('Terjadi kesalahan:', error);
     res.status(500).json({ error: 'Terjadi kesalahan saat memproses gambar.' });
   }
 };
