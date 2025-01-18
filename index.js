@@ -14,11 +14,13 @@ const downloadImage = async (url, outputPath) => {
     responseType: 'arraybuffer',
   });
   fs.writeFileSync(outputPath, response.data);
+  console.log(`Gambar berhasil diunduh ke: ${outputPath}`);
   return outputPath;
 };
 
 const processImage = async (req, res, tool) => {
   const imageUrl = req.query.url;
+  console.log(`Menerima URL gambar: ${imageUrl}`);
 
   if (!imageUrl) {
     return res.status(400).json({ error: 'URL gambar diperlukan!' });
@@ -29,32 +31,17 @@ const processImage = async (req, res, tool) => {
     const tempFilePath = path.join(tempDir, `${Date.now()}.jpg`);
     await downloadImage(imageUrl, tempFilePath);
 
-    const { url } = await pxpic.create(tempFilePath, tool);
+    console.log(`Memulai pemrosesan gambar dengan tool: ${tool}`);
+    const result = await pxpic.create(tempFilePath, tool);
 
-    fs.unlinkSync(tempFilePath);
+    console.log(`Hasil pemrosesan: ${JSON.stringify(result)}`);
 
-    const imageBuffer = await axios.get(url, { responseType: 'arraybuffer' });
-
-    res.set('Content-Type', 'image/jpeg');
-    res.send(imageBuffer.data);
+    res.json(result);
   } catch (error) {
     console.error('Terjadi kesalahan:', error);
     res.status(500).json({ error: 'Terjadi kesalahan saat memproses gambar.' });
   }
 };
-
-app.get('/', (req, res) => {
-  res.json({
-    message: 'API untuk memproses gambar.',
-    routes: {
-      removebg: '/api/removebg?url=<image_url>',
-      enhance: '/api/enhance?url=<image_url>',
-      upscale: '/api/upscale?url=<image_url>',
-      restore: '/api/restore?url=<image_url>',
-      colorize: '/api/colorize?url=<image_url>',
-    }
-  });
-});
 
 app.get('/api/removebg', (req, res) => processImage(req, res, 'removebg'));
 app.get('/api/enhance', (req, res) => processImage(req, res, 'enhance'));
