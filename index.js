@@ -29,15 +29,16 @@ const processImage = async (req, res, tool) => {
     const tempFilePath = path.join(tempDir, `${Date.now()}.jpg`);
     await downloadImage(imageUrl, tempFilePath);
 
-    const processedImageUrl = await pxpic.create(tempFilePath, tool);
+    const { url } = await pxpic.create(tempFilePath, tool);
 
-    const imageBuffer = await axios.get(processedImageUrl, { responseType: 'arraybuffer' });
+    fs.unlinkSync(tempFilePath);
+
+    const imageBuffer = await axios.get(url, { responseType: 'arraybuffer' });
 
     res.set('Content-Type', 'image/jpeg');
     res.send(imageBuffer.data);
-
-    fs.unlinkSync(tempFilePath); // Menghapus file setelah dikirimkan sebagai respons
   } catch (error) {
+    console.error('Terjadi kesalahan:', error);
     res.status(500).json({ error: 'Terjadi kesalahan saat memproses gambar.' });
   }
 };
